@@ -9,7 +9,7 @@ from aiohttp.web_routedef import RouteDef
 from tgfs.config import Config
 from tgfs.database import DB
 from tgfs.routes import routes
-from tgfs.utils.utils import human_bytes, parse_token, make_token
+from tgfs.utils.utils import human_bytes, parse_token
 
 log = logging.getLogger(__name__)
 
@@ -63,8 +63,5 @@ async def handle_group_request(req: web.Request) -> web.Response:
     return aiohttp_jinja2.render_template("group.html", req, {
         "group": group,
         "files": files,
-        "public_url": Config.PUBLIC_URL,
-        "make_token": make_token,
-        "human_bytes": human_bytes,
-        "Config": Config
+        "public_url": Config.PUBLIC_URL
     })
