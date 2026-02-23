@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,52 +60,180 @@
         }
     </style>
 </head>
+
 <body>
 
-<h2>{{ file_name }}</h2>
+    <h2>{{ file_name }}</h2>
 
-<div class="info">
-    <span><strong>ID:</strong> {{ id }}</span>
-    <span><strong>User:</strong> {{ user_id }}</span>
-    <span><strong>DC:</strong> {{ dc_id }}</span>
-    <span><strong>Size:</strong> {{ file_size }}</span>
-    <span><strong>MIME:</strong> {{ mime_type }}</span>
-</div>
+    <div class="info">
+        <span><strong>ID:</strong> {{ id }}</span>
+        <span><strong>User:</strong> {{ user_id }}</span>
+        <span><strong>DC:</strong> {{ dc_id }}</span>
+        <span><strong>Size:</strong> {{ file_size }}</span>
+        <span><strong>MIME:</strong> {{ mime_type }}</span>
+    </div>
 
-{% if tag == "video" %}
+    {% if tag == "video" %}
     <video id="player" controls playsinline preload="metadata">
         <source src="{{ url }}" type="{{ mime_type }}">
     </video>
 
-{% elif tag == "audio" %}
+    {% elif tag == "audio" %}
     <audio id="player" controls preload="metadata">
         <source src="{{ url }}" type="{{ mime_type }}">
     </audio>
 
-{% elif tag == "image" %}
+    {% elif tag == "image" %}
     <img src="{{ url }}" alt="{{ file_name }}">
 
-{% else %}
+    {% else %}
     <p>No inline preview available.</p>
-{% endif %}
+    {% endif %}
 
-<div class="download">
-    <a href="{{ url }}" download>Download</a>
-</div>
+    <div class="download">
+        <a href="{{ url }}" download>Download</a>
+    </div>
 
-<footer>
-    <a href="https://github.com/SpringsFern/TG-FileStream">TG-FileStream</a>
-</footer>
+    {% if tag == "video" or tag == "audio" %}
+    <div class="external-player" style="margin-top:15px;">
+        <strong>Open in External Player:</strong><br><br>
 
-<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const player = document.querySelector('#player');
-        if (player) {
-            new Plyr(player);
+        <label>Platform:</label>
+        <select id="platformSelect">
+            <option value="">Select Platform</option>
+            <option value="android">Android</option>
+            <option value="ios">iOS</option>
+            <option value="desktop">Desktop</option>
+        </select>
+
+        <label style="margin-left:10px;">Player:</label>
+        <select id="playerSelect">
+            <option value="">Select Player</option>
+        </select>
+
+        <button id="openPlayerBtn" style="margin-left:10px;">Open</button>
+    </div>
+    {% endif %}
+
+    <footer>
+        <a href="https://github.com/SpringsFern/TG-FileStream">TG-FileStream</a>
+    </footer>
+
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const player = document.querySelector('#player');
+            if (player) {
+                new Plyr(player);
+            }
+        });
+    </script>
+
+    <script>
+        function detectPlatform() {
+            const ua = navigator.userAgent.toLowerCase();
+
+            if (ua.includes("android")) return "android";
+            if (ua.includes("iphone") || ua.includes("ipad")) return "ios";
+            if (ua.includes("mac") || ua.includes("win") || ua.includes("linux")) return "desktop";
+
+            return "";
         }
-    });
-</script>
+
+        const streamUrl = "{{ url }}";
+
+        const players = {
+            android: {
+                vlc: {
+                    name: "VLC",
+                    build: (url) => `intent:${url}#Intent;package=org.videolan.vlc;type=video/*;end`
+                },
+                mx: {
+                    name: "MX Player",
+                    build: (url) => `intent:${url}#Intent;package=com.mxtech.videoplayer.ad;type=video/*;end`
+                },
+                just: {
+                    name: "Just Player",
+                    build: (url) => `intent:${url}#Intent;package=com.brouken.player;type=video/*;end`
+                }
+            },
+            ios: {
+                vlc: {
+                    name: "VLC",
+                    build: (url) => `vlc://${url}`
+                },
+                infuse: {
+                    name: "Infuse",
+                    build: (url) => `infuse://x-callback-url/play?url=${encodeURIComponent(url)}`
+                }
+            },
+            desktop: {
+                vlc: {
+                    name: "VLC",
+                    build: (url) => `vlc://${url}`
+                }
+            }
+        };
+
+        const platformSelect = document.getElementById("platformSelect");
+        const playerSelect = document.getElementById("playerSelect");
+        const openBtn = document.getElementById("openPlayerBtn");
+
+        const detected = detectPlatform();
+        if (detected && players[detected]) {
+            platformSelect.value = detected;
+            populatePlayers(detected);
+        }
+
+        function populatePlayers(platform) {
+            playerSelect.innerHTML = '';
+
+            const platformPlayers = players[platform];
+            if (!platformPlayers) return;
+
+            const keys = Object.keys(platformPlayers);
+
+            keys.forEach((key, index) => {
+                const opt = document.createElement("option");
+                opt.value = key;
+                opt.textContent = platformPlayers[key].name;
+                playerSelect.appendChild(opt);
+            });
+
+            // Select first player automatically
+            if (keys.length > 0) {
+                playerSelect.value = keys[0];
+            }
+        }
+
+        if (platformSelect) {
+
+            platformSelect.addEventListener("change", function () {
+                const platform = this.value;
+                playerSelect.innerHTML = '<option value="">Select Player</option>';
+
+                if (!players[platform]) return;
+
+                Object.keys(players[platform]).forEach(key => {
+                    const opt = document.createElement("option");
+                    opt.value = key;
+                    opt.textContent = players[platform][key].name;
+                    playerSelect.appendChild(opt);
+                });
+            });
+
+            openBtn.addEventListener("click", function () {
+                const platform = platformSelect.value;
+                const player = playerSelect.value;
+
+                if (!platform || !player) return;
+
+                const link = players[platform][player].build(streamUrl);
+                window.location.href = link;
+            });
+        }
+    </script>
 
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>{{ group.name }}</title>
@@ -25,42 +26,58 @@
         }
 
         .file-list {
-            border-top: 1px solid #ccc;
-            border-bottom: 1px solid #ccc;
-            padding: 10px 0;
             margin-bottom: 15px;
         }
 
         .file-item {
-            cursor: pointer;
-            padding: 5px 0;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
         }
 
         .file-item:hover {
-            background: #f2f2f2;
+            background: #f1f7ff;
+            border-color: #c8dcff;
         }
 
-        .preview-box {
-            margin-top: 15px;
+        .file-item strong {
+            font-size: 14px;
         }
 
-        img {
-            max-width: 100%;
-            max-height: 80vh;
-            height: auto;
-            display: block;
+        .file-item .btn {
+            margin-top: 6px;
         }
 
-        .download a {
+        .btn {
+            display: inline-block;
             text-decoration: none;
-            border: 1px solid #000;
-            padding: 5px 10px;
-            background: #f0f0f0;
-            color: #000;
+            padding: 5px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: none;
+            color: #fff;
+            transition: 0.2s ease;
         }
 
-        .download a:hover {
-            background: #e0e0e0;
+        .btn-watch {
+            background-color: #1976d2;
+            /* Blue */
+        }
+
+        .btn-watch:hover {
+            background-color: #125ca1;
+        }
+
+        .btn-download {
+            background-color: #2e7d32;
+            /* Green */
+            margin-left: 6px;
+        }
+
+        .btn-download:hover {
+            background-color: #1f5a22;
         }
 
         footer {
@@ -69,95 +86,47 @@
         }
     </style>
 </head>
+
 <body>
 
-<h2>{{ group.name }}</h2>
+    <h2>{{ group.name }}</h2>
 
-<div class="group-info">
-    <div><strong>Group ID:</strong> {{ group.group_id }}</div>
-    <div><strong>User ID:</strong> {{ group.user_id }}</div>
-    {% if group.created_at %}
+    <div class="group-info">
+        <div><strong>Group ID:</strong> {{ group.group_id }}</div>
+        <div><strong>User ID:</strong> {{ group.user_id }}</div>
+        {% if group.created_at %}
         <div><strong>Created:</strong> {{ group.created_at }}</div>
-    {% endif %}
-    <div><strong>Total Files:</strong> {{ files|length }}</div>
-</div>
+        {% endif %}
+        <div><strong>Total Files:</strong> {{ files|length }}</div>
+    </div>
 
-<div class="file-list">
-    {% for file in files %}
-        <div class="file-item"
-             onclick="showFile({{ loop.index0 }})">
-            {{ file.file_name }} ({{ human_bytes(file.file_size) }})
+    <div class="file-list">
+        {% for file in files %}
+        <div class="file-item" style="padding:8px 0;">
+            <div>
+                <strong>{{ file.file_name }}</strong>
+                ({{ human_bytes(file.file_size) }})
+            </div>
+
+            <div style="margin-top:6px;">
+                <a href="{{ Config.PUBLIC_URL }}/wt/{{ make_token(group.user_id, file.id) }}"
+                   class="btn btn-watch">
+                    Watch
+                </a>
+
+                <a href="{{ Config.PUBLIC_URL }}/dl/{{ make_token(group.user_id, file.id) }}"
+                   class="btn btn-download">
+                    Download
+                </a>
+            </div>
         </div>
-    {% endfor %}
-</div>
+        {% endfor %}
+    </div>
 
-<div id="previewContainer" class="preview-box"></div>
-
-<footer>
-    <a href="https://github.com/SpringsFern/TG-FileStream">TG-FileStream</a>
-</footer>
-
-<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-
-<script>
-const files = [
-{% for file in files %}
-{
-    id: {{ file.id }},
-    name: {{ file.file_name|tojson }},
-    size: "{{ human_bytes(file.file_size) }}",
-    mime: "{{ file.mime_type }}",
-    tag: "{{ file.mime_type.split('/')[0] if file.mime_type else '' }}",
-    url: "{{ Config.PUBLIC_URL }}/dl/{{ make_token(group.user_id, file.id) }}"
-}{% if not loop.last %},{% endif %}
-{% endfor %}
-];
-
-function showFile(index) {
-    const file = files[index];
-    const container = document.getElementById("previewContainer");
-
-    let html = `
-        <div>
-            <div><strong>Name:</strong> ${file.name}</div>
-            <div><strong>ID:</strong> ${file.id}</div>
-            <div><strong>Size:</strong> ${file.size}</div>
-            <div><strong>MIME:</strong> ${file.mime}</div>
-        </div>
-    `;
-
-    if (file.tag === "video") {
-        html += `
-            <video id="player" controls preload="metadata">
-                <source src="${file.url}" type="${file.mime}">
-            </video>
-        `;
-    } else if (file.tag === "audio") {
-        html += `
-            <audio id="player" controls preload="metadata">
-                <source src="${file.url}" type="${file.mime}">
-            </audio>
-        `;
-    } else if (file.tag === "image") {
-        html += `<img src="${file.url}" alt="${file.name}">`;
-    } else {
-        html += `<p>No inline preview available.</p>`;
-    }
-
-    html += `
-        <div class="download" style="margin-top:10px;">
-            <a href="${file.url}" download>Download</a>
-        </div>
-    `;
-
-    container.innerHTML = html;
-
-    const player = document.querySelector('#player');
-    if (player) {
-        new Plyr(player);
-    }
-}
-</script>
+    <footer>
+        <a href="https://github.com/SpringsFern/TG-FileStream">TG-FileStream</a>
+    </footer>
 
 </body>
+
 </html>
