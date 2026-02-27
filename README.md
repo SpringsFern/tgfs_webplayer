@@ -1,4 +1,4 @@
-# TGFS WebPlayer Patch
+# TG-FileStream WebPlayer Patch
 
 This repository is a patch for **TG-FileStream**.
 
@@ -56,7 +56,7 @@ If needed, you can also add it to your main environment requirements.
 After installation, start or restart TG-FileStream:
 
 ```
-python3 main.py
+python3 -m tgfs
 ```
 
 Or restart the service if running in the background.
