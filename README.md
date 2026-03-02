@@ -16,7 +16,13 @@ Make sure TG-FileStream is fully working before continuing.
 
 ---
 
-## 2. Clone This Repository
+## 2. Installation Methods
+
+You can install this plugin using **either** of the following methods.
+
+---
+
+### Method 1 — Local Patch (Development)
 
 Clone this repository inside the `patches` directory of TG-FileStream.
 
@@ -28,18 +34,18 @@ Your folder structure should look like this:
 ├── .git
 ├── tgfs/
 │   ├── patches/
-│   │   └── tgfs_webplayer   ← clone this repo here
+│   │   └── tgfs-webplayer   ← clone this repo here
 ```
 Example:
 
 ```sh
 cd <TG-FileStream base folder>/tgfs/patches
-git clone https://github.com/SpringsFern/tgfs_webplayer
+git clone https://github.com/SpringsFern/tgfs-webplayer
 ```
 
 ---
 
-## 3. Install Requirements
+#### Install Requirements
 
 Install required dependency:
 
@@ -47,7 +53,16 @@ Install required dependency:
 pip3 install aiohttp-jinja2
 ```
 
-If needed, you can also add it to your main environment requirements.
+---
+
+### Method 2 — Install as Plugin (Recommended)
+
+You can install this plugin directly via pip using the Git repository:
+```
+pip3 install git+https://github.com/SpringsFern/tgfs-webplayer
+```
+
+This method uses TGFS entry-point plugin loading and does not require placing files inside the patches directory.
 
 ---
 
