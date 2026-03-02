@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tgfs-webplayer"
+version = "1.0.0"
+description = "WebPlayer plugin for TG-FileStream"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "aiohttp",
+    "aiohttp-jinja2",
+]
+
+[project.entry-points."tgfs.plugins"]
+webplayer = "tgfs_webplayer"
+
+[tool.setuptools]
+packages = ["tgfs_webplayer"]
+
+[tool.setuptools.package-dir]
+tgfs_webplayer = "."
