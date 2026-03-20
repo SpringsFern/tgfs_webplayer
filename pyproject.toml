@@ -21,3 +21,6 @@ packages = ["tgfs_webplayer"]
 
 [tool.setuptools.package-dir]
 tgfs_webplayer = "."
+
+[tool.setuptools.package-data]
+tgfs_webplayer = ["templates/*"]
